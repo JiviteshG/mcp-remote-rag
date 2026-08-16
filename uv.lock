@@ -2940,6 +2940,7 @@ dependencies = [
     { name = "fastmcp" },
     { name = "llama-cloud-services" },
     { name = "llama-index" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
@@ -2948,6 +2949,7 @@ requires-dist = [
     { name = "fastmcp", specifier = ">=3.4.7" },
     { name = "llama-cloud-services", specifier = ">=0.6.94" },
     { name = "llama-index", specifier = ">=0.14.23" },
+    { name = "python-dotenv", specifier = ">=1.2.3" },
 ]
 
 [[package]]

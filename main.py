@@ -3,6 +3,7 @@ from fastmcp import FastMCP
 import chromadb
 from llama_parse import LlamaParse
 from llama_index.core import SimpleDirectoryReader
+from dotenv import load_dotenv
 
 PERSISTENCE_DIR = "./chroma_db"
 COLLECTION_NAME = "mcp_rag_collection"
