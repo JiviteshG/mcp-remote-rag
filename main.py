@@ -9,6 +9,8 @@ PERSISTENCE_DIR = "./chroma_db"
 COLLECTION_NAME = "mcp_rag_collection"
 DATA_DIR = "./papers"
 
+mcp = FastMCP("Remote RAG MCP Server")
+
 def init_chromadb():
     client = chromadb.PersistentClient(path=PERSISTENCE_DIR)
     collection = client.get_or_create_collection(name=COLLECTION_NAME)   
@@ -17,7 +19,17 @@ def init_chromadb():
 def get_chromadb_client():
     return chromadb.PersistentClient(path=PERSISTENCE_DIR)
 
+@mcp.tool
 def ingest_data_directory(llama_cloud_api_key, collection_name, data_dir):
+    """
+    Ingests documents from a specified directory into a ChromaDB collection that the user can quert them later.
+    Args:
+        llama_cloud_api_key (str): The API key for LlamaParse.
+        collection_name (str): The name of the ChromaDB collection to store documents.
+        data_dir (str): The directory containing documents to ingest.
+    Returns:
+        list: A list of ingested documents.
+    """
     chroma_client = get_chromadb_client()
     chroma_client.delete_collection(name=collection_name)  # Delete the collection if it exists
     collection = chroma_client.get_or_create_collection(name=collection_name)
