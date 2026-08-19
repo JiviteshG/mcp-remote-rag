@@ -1,7 +1,12 @@
 import os
 from fastmcp import FastMCP
 import chromadb
+# from llama_cloud_services import LlamaParse
 from llama_parse import LlamaParse
+
+import warnings
+warnings.filterwarnings("ignore")
+
 from llama_index.core import SimpleDirectoryReader
 from dotenv import load_dotenv
 
@@ -53,18 +58,13 @@ def ingest_data_directory(llama_cloud_api_key, collection_name, data_dir):
         )
 
     final_count = collection.count()
-    print(f"Final document count in collection '{collection_name}': {final_count}")
-    return documents
+    return f"Final document count in collection '{collection_name}': {final_count}"
+
 
 def main():
     init_chromadb()
     load_dotenv()
-
-    LLAMA_CLOUD_API_KEY = os.getenv("LLAMA_CLOUD_API_KEY")
-    print("Initialized ChromaDB and LlamaParse API Key!..")
-
-    documents = ingest_data_directory(LLAMA_CLOUD_API_KEY, COLLECTION_NAME, DATA_DIR)
-    print(f"Ingested {len(documents)} documents.")
+    mcp.run(transport="stdio")
 
 if __name__ == "__main__":
     main()
