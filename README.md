@@ -1,4 +1,4 @@
-# Simple RAG MCP Server
+# Remote RAG MCP Server
 
 A lightweight Python project that exposes a retrieval-augmented generation (RAG) workflow through a FastMCP server. It ingests documents from a folder, stores them in a persistent ChromaDB collection, and lets you query the indexed content later via semantic search.
 
@@ -23,7 +23,7 @@ This project is built for local document retrieval and experimentation. It is es
 ## Project Structure
 
 ```text
-simple-rag/
+mcp-rag/
 ├── main.py               # FastMCP server and RAG tool definitions
 ├── pyproject.toml        # Project dependencies and Python config
 ├── README.md             # Project documentation
