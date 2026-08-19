@@ -60,6 +60,46 @@ def ingest_data_directory(llama_cloud_api_key, collection_name, data_dir):
     final_count = collection.count()
     return f"Final document count in collection '{collection_name}': {final_count}"
 
+@mcp.tool
+def query_documents(query: str, n_results: int = 2, collection_name: str = COLLECTION_NAME) -> str:
+    """
+    Queries the ChromaDB collection for documents relevant to the provided query.
+    Args:
+        query (str): The query string to search for relevant documents.
+        n_results (int): The number of top results to return. Default is 2.
+        collection_name (str): The name of the ChromaDB collection to query. Default is COLLECTION_NAME.
+    Returns:
+        str: A formatted string containing the query results, including document content, metadata, and distances.
+    """
+    chroma_client = get_chromadb_client()
+    collection = chroma_client.get_collection(name=collection_name)
+
+    results = collection.query(
+        query_texts=[query],
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"]
+    )
+
+    if len(results["documents"]) == 0 or not results["documents"][0]:
+        return "No documents found."
+
+    # Format the results for better readability
+    formatted_results = []
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0] if results["metadatas"] else [{}] * len(documents)
+    distances = results["distances"][0] if results["distances"] else [0] * len(documents)
+
+    for i, (doc, metadata, distance) in enumerate(zip(documents, metadatas, distances)):
+        result_text = f"-- Result {i + 1} --\n"
+        result_text += f"Document content: {doc}\n"
+        result_text += f"Metadata: {metadata}\n"
+        result_text += f"Distance: {distance}\n"
+        formatted_results.append(result_text)
+
+    response = f"FOund {len(formatted_results)} results for query: '{query}'\n\n" + "\n".join(formatted_results) 
+    response += "\n".join(formatted_results) 
+
+    return response
 
 def main():
     init_chromadb()
