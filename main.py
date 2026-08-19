@@ -101,6 +101,22 @@ def query_documents(query: str, n_results: int = 2, collection_name: str = COLLE
 
     return response
 
+@mcp.tool
+def get_db_stats(collection_name: str = COLLECTION_NAME) -> str:
+    """
+    Retrieves statistics about the ChromaDB collection, including the number of documents.
+    Args:
+        collection_name (str): The name of the ChromaDB collection to retrieve stats from. Default is COLLECTION_NAME.
+    Returns:
+        str: A formatted string containing the number of documents in the collection.
+    """
+    chroma_client = get_chromadb_client()
+    collection = chroma_client.get_collection(name=collection_name)
+
+    document_count = collection.count()
+
+    return f"Collection '{collection_name}' contains {document_count} documents."
+
 def main():
     init_chromadb()
     load_dotenv()
