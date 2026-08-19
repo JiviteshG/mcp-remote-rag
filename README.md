@@ -140,6 +140,11 @@ This enables the remote chat app to query your local knowledge base without runn
 
 > Note: the tunnel is temporary and public, so keep the ngrok URL private if you do not want external access to your local MCP service.
 
+<img width="891" height="178" alt="image" src="https://github.com/user-attachments/assets/a08c76d1-9e32-415e-b13c-819297be12e9" />
+<img width="895" height="316" alt="image" src="https://github.com/user-attachments/assets/3e6268de-9188-46c2-a2b1-2143db9b10cc" />
+
+
+
 ## Available Tools
 
 ### ingest_data_directory
