@@ -120,7 +120,7 @@ def get_db_stats(collection_name: str = COLLECTION_NAME) -> str:
 def main():
     init_chromadb()
     load_dotenv()
-    mcp.run(transport="stdio")
+    mcp.run(transport="streamable-http", host="localhost", port=8000)
 
 if __name__ == "__main__":
     main()
