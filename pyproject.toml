@@ -12,4 +12,5 @@ dependencies = [
     "llama-index>=0.14.23",
     "llama-parse>=0.5.20",
     "python-dotenv>=1.2.3",
+    "scalekit-sdk-python>=2.17.0",
 ]
