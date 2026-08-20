@@ -1,127 +1,49 @@
-import os
-from fastmcp import FastMCP
-import chromadb
-# from llama_cloud_services import LlamaParse
-from llama_parse import LlamaParse
+import contextlib
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-import warnings
-warnings.filterwarnings("ignore")
+from auth import AuthMiddleware
+from config import settings
+from docs_serv import mcp as docs_mcp_server
+import json
 
-from llama_index.core import SimpleDirectoryReader
-from dotenv import load_dotenv
+# Create a combined lifespan to manage the MCP session manager
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with docs_mcp_server.session_manager.run():
+        yield
 
-PERSISTENCE_DIR = "./chroma_db"
-COLLECTION_NAME = "mcp_rag_collection"
-DATA_DIR = "./papers"
+app = FastAPI(lifespan=lifespan)
 
-mcp = FastMCP("Remote RAG MCP Server")
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your actual origins
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
 
-def init_chromadb():
-    client = chromadb.PersistentClient(path=PERSISTENCE_DIR)
-    collection = client.get_or_create_collection(name=COLLECTION_NAME)   
-    return collection 
-
-def get_chromadb_client():
-    return chromadb.PersistentClient(path=PERSISTENCE_DIR)
-
-@mcp.tool
-def ingest_data_directory(llama_cloud_api_key, collection_name, data_dir):
+# MCP well-known endpoint
+@app.get("/.well-known/oauth-protected-resource/mcp")
+async def oauth_protected_resource_metadata():
     """
-    Ingests documents from a specified directory into a ChromaDB collection that the user can quert them later.
-    Args:
-        llama_cloud_api_key (str): The API key for LlamaParse.
-        collection_name (str): The name of the ChromaDB collection to store documents.
-        data_dir (str): The directory containing documents to ingest.
-    Returns:
-        list: A list of ingested documents.
+    OAuth 2.0 Protected Resource Metadata endpoint for MCP client discovery.
+    Required by the MCP specification for authorization server discovery.
     """
-    chroma_client = get_chromadb_client()
-    chroma_client.delete_collection(name=collection_name)  # Delete the collection if it exists
-    collection = chroma_client.get_or_create_collection(name=collection_name)
 
-    parser = LlamaParse(api_key=llama_cloud_api_key, result_type="text")
-
-    # The file extracter accepts pdf and docx files, and uses the LlamaParse parser to extract text from them
-    file_extractor = {
-        ".pdf": parser,
-        ".docx": parser,
-        }
-    documents = SimpleDirectoryReader(data_dir, file_extractor=file_extractor).load_data()
-
-    # Added documents to chromadb vector database
-    # Note: We did not use an embedding model here, chromadb will use the default embedding model to generate embeddings for the documents
-    for doc in documents:
-        collection.add(
-            documents=[doc.text],
-            metadatas=[doc.metadata],
-            ids=[doc.doc_id]
-        )
-
-    final_count = collection.count()
-    return f"Final document count in collection '{collection_name}': {final_count}"
-
-@mcp.tool
-def query_documents(query: str, n_results: int = 2, collection_name: str = COLLECTION_NAME) -> str:
-    """
-    Queries the ChromaDB collection for documents relevant to the provided query.
-    Args:
-        query (str): The query string to search for relevant documents.
-        n_results (int): The number of top results to return. Default is 2.
-        collection_name (str): The name of the ChromaDB collection to query. Default is COLLECTION_NAME.
-    Returns:
-        str: A formatted string containing the query results, including document content, metadata, and distances.
-    """
-    chroma_client = get_chromadb_client()
-    collection = chroma_client.get_collection(name=collection_name)
-
-    results = collection.query(
-        query_texts=[query],
-        n_results=n_results,
-        include=["documents", "metadatas", "distances"]
-    )
-
-    if len(results["documents"]) == 0 or not results["documents"][0]:
-        return "No documents found."
-
-    # Format the results for better readability
-    formatted_results = []
-    documents = results["documents"][0]
-    metadatas = results["metadatas"][0] if results["metadatas"] else [{}] * len(documents)
-    distances = results["distances"][0] if results["distances"] else [0] * len(documents)
-
-    for i, (doc, metadata, distance) in enumerate(zip(documents, metadatas, distances)):
-        result_text = f"-- Result {i + 1} --\n"
-        result_text += f"Document content: {doc}\n"
-        result_text += f"Metadata: {metadata}\n"
-        result_text += f"Distance: {distance}\n"
-        formatted_results.append(result_text)
-
-    response = f"FOund {len(formatted_results)} results for query: '{query}'\n\n" + "\n".join(formatted_results) 
-    response += "\n".join(formatted_results) 
-
+    response = json.loads(settings.METADATA_JSON_RESPONSE)
     return response
 
-@mcp.tool
-def get_db_stats(collection_name: str = COLLECTION_NAME) -> str:
-    """
-    Retrieves statistics about the ChromaDB collection, including the number of documents.
-    Args:
-        collection_name (str): The name of the ChromaDB collection to retrieve stats from. Default is COLLECTION_NAME.
-    Returns:
-        str: A formatted string containing the number of documents in the collection.
-    """
-    chroma_client = get_chromadb_client()
-    collection = chroma_client.get_collection(name=collection_name)
-
-    document_count = collection.count()
-
-    return f"Collection '{collection_name}' contains {document_count} documents."
+# Create and mount the MCP server with authentication
+mcp_server = docs_mcp_server.streamable_http_app()
+app.add_middleware(AuthMiddleware)
+app.mount("/", mcp_server)
 
 def main():
-    init_chromadb()
-    load_dotenv()
-    mcp.run(transport="streamable-http", host="localhost", port=8000)
+    """Main entry point for the MCP server."""
+    uvicorn.run(app, host="0.0.0.0", port=settings.PORT, log_level="debug")
 
 if __name__ == "__main__":
     main()
-    
