@@ -61,7 +61,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
             if is_tool_call:
                 required_scopes = ["dcouments:read"] # get required scope for your tool
                 validation_options.required_scopes = required_scopes  
-            
             try:
                 scalekit_client.validate_token(token, options=validation_options)
                 

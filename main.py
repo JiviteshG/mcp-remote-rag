@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auth import AuthMiddleware
 from config import settings
-from docs_serv import mcp as docs_mcp_server
+from doc_serv import mcp as docs_mcp_server
 import json
 
 # Create a combined lifespan to manage the MCP session manager
