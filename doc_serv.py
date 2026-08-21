@@ -16,7 +16,6 @@ DATA_DIR = "./papers"
 
 mcp = FastMCP(name = "Remote RAG MCP Server",
               instructions="Welcome to the Remote RAG MCP Server! This server allows you to ingest documents from a specified directory into a ChromaDB collection and query them later. You can use the provided tools to manage your document collection and retrieve relevant information based on your queries.",
-              description="This MCP server is designed to facilitate the ingestion and querying of documents using ChromaDB. It provides tools for adding documents to a collection, querying the collection for relevant documents, and retrieving statistics about the collection. The server is built using FastMCP and integrates with LlamaParse for document parsing.",
               version="1.0.0")
 
 def init_chromadb():

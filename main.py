@@ -8,13 +8,7 @@ from config import settings
 from doc_serv import mcp as docs_mcp_server
 import json
 
-# Create a combined lifespan to manage the MCP session manager
-@contextlib.asynccontextmanager
-async def lifespan(app: FastAPI):
-    async with docs_mcp_server.session_manager.run():
-        yield
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 # Add CORS middleware
 app.add_middleware(
@@ -37,7 +31,7 @@ async def oauth_protected_resource_metadata():
     return response
 
 # Create and mount the MCP server with authentication
-mcp_server = docs_mcp_server.streamable_http_app()
+mcp_server = docs_mcp_server.http_app()
 app.add_middleware(AuthMiddleware)
 app.mount("/", mcp_server)
 
