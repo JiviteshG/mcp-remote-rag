@@ -12,8 +12,8 @@ class Settings:
     SCALEKIT_AUDIENCE_NAME: str = os.environ.get("SCALEKIT_AUDIENCE_NAME", "")
     METADATA_JSON_RESPONSE: str = os.environ.get("METADATA_JSON_RESPONSE", "")
 
-    # GNews API Key
-    GNEWS_API_KEY: str = os.environ.get("GNEWS_API_KEY", "")
+    # Document Server API Key
+    DOCUMENTS_API_KEY: str = os.environ.get("DOCUMENTS_API_KEY", "")
 
     # Server Port
     PORT: int = int(os.environ.get("PORT", 10000))
@@ -29,7 +29,7 @@ class Settings:
             raise ValueError("SCALEKIT_RESOURCE_METADATA_URL environment variable not set")
         if not self.SCALEKIT_AUDIENCE_NAME:
             raise ValueError("SCALEKIT_AUDIENCE_NAME environment variable not set")
-        if not self.GNEWS_API_KEY:
-            raise ValueError("GNEWS_API_KEY environment variable not set")
+        if not self.DOCUMENTS_API_KEY:
+            raise ValueError("DOCUMENTS_API_KEY environment variable not set")
 
 settings = Settings()
