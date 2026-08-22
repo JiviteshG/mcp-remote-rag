@@ -59,13 +59,20 @@ class AuthMiddleware(BaseHTTPMiddleware):
             
             required_scopes = []
             if is_tool_call:
-                required_scopes = ["dcouments:read"] # get required scope for your tool
+                required_scopes = ["documents:read"] # get required scope for your tool
                 validation_options.required_scopes = required_scopes  
             try:
+                logger.info(f"Validating token with issuer: {settings.SCALEKIT_ENVIRONMENT_URL}")
+                logger.info(f"Validating token with audience: {settings.SCALEKIT_AUDIENCE_NAME}")
                 scalekit_client.validate_token(token, options=validation_options)
+                logger.info("Token validation successful!")
                 
             except Exception as e:
-                raise HTTPException(status_code=401, detail="Token validation failed")
+                logger.error(f"Token validation error: {str(e)}")
+                logger.error(f"Exception type: {type(e).__name__}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                raise HTTPException(status_code=401, detail=f"Token validation failed: {str(e)}")
 
         except HTTPException as e:
             return JSONResponse(
