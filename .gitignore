@@ -11,3 +11,7 @@ wheels/
 chroma_db
 .env
 papers
+
+.vscode/
+server.log
+server_err.log
