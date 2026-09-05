@@ -18,18 +18,17 @@ class Settings:
     # Server Port
     PORT: int = int(os.environ.get("PORT", 10000))
 
-    def __post_init__(self):
-        if not self.SCALEKIT_CLIENT_ID:
-            raise ValueError("SCALEKIT_CLIENT_ID environment variable not set")
-        if not self.SCALEKIT_CLIENT_SECRET:
-            raise ValueError("SCALEKIT_CLIENT_SECRET environment variable not set")
-        if not self.SCALEKIT_ENVIRONMENT_URL:
-            raise ValueError("SCALEKIT_ENVIRONMENT_URL environment variable not set")
-        if not self.SCALEKIT_RESOURCE_METADATA_URL:
-            raise ValueError("SCALEKIT_RESOURCE_METADATA_URL environment variable not set")
-        if not self.SCALEKIT_AUDIENCE_NAME:
-            raise ValueError("SCALEKIT_AUDIENCE_NAME environment variable not set")
-        if not self.DOCUMENTS_API_KEY:
-            raise ValueError("DOCUMENTS_API_KEY environment variable not set")
+    def __init__(self):
+        required = {
+            "SCALEKIT_CLIENT_ID": self.SCALEKIT_CLIENT_ID,
+            "SCALEKIT_CLIENT_SECRET": self.SCALEKIT_CLIENT_SECRET,
+            "SCALEKIT_ENVIRONMENT_URL": self.SCALEKIT_ENVIRONMENT_URL,
+            "SCALEKIT_RESOURCE_METADATA_URL": self.SCALEKIT_RESOURCE_METADATA_URL,
+            "SCALEKIT_AUDIENCE_NAME": self.SCALEKIT_AUDIENCE_NAME,
+            "DOCUMENTS_API_KEY": self.DOCUMENTS_API_KEY,
+        }
+        missing = [k for k, v in required.items() if not v]
+        if missing:
+            raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
 
 settings = Settings()
