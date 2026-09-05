@@ -20,6 +20,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check endpoint for load balancers and Kubernetes liveness probes
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 # MCP well-known endpoint
 @app.get("/.well-known/oauth-protected-resource/mcp")
 async def oauth_protected_resource_metadata():

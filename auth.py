@@ -35,7 +35,7 @@ scalekit_client = ScalekitClient(
 # Authentication middleware
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path.startswith("/.well-known/"):
+        if request.url.path.startswith("/.well-known/") or request.url.path == "/health":
             return await call_next(request)
 
         try:
