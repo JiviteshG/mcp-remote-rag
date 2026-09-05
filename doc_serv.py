@@ -98,8 +98,7 @@ def query_documents(query: str, n_results: int = 2, collection_name: str = COLLE
         result_text += f"Distance: {distance}\n"
         formatted_results.append(result_text)
 
-    response = f"FOund {len(formatted_results)} results for query: '{query}'\n\n" + "\n".join(formatted_results) 
-    response += "\n".join(formatted_results) 
+    response = f"Found {len(formatted_results)} results for query: '{query}'\n\n" + "\n".join(formatted_results)
 
     return response
 
