@@ -18,6 +18,11 @@ class Settings:
     # Server Port
     PORT: int = int(os.environ.get("PORT", 10000))
 
+    # CORS — comma-separated list of allowed origins; defaults to localhost only
+    ALLOWED_ORIGINS: list[str] = [
+        o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    ]
+
     def __init__(self):
         required = {
             "SCALEKIT_CLIENT_ID": self.SCALEKIT_CLIENT_ID,
