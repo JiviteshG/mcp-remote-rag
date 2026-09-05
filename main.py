@@ -8,7 +8,8 @@ from config import settings
 from doc_serv import mcp as docs_mcp_server
 import json
 
-app = FastAPI()
+mcp_server = docs_mcp_server.http_app()
+app = FastAPI(lifespan=mcp_server.lifespan)
 
 # Add CORS middleware
 app.add_middleware(
@@ -30,8 +31,7 @@ async def oauth_protected_resource_metadata():
     response = json.loads(settings.METADATA_JSON_RESPONSE)
     return response
 
-# Create and mount the MCP server with authentication
-mcp_server = docs_mcp_server.http_app()
+# Mount the MCP server with authentication
 app.add_middleware(AuthMiddleware)
 app.mount("/", mcp_server)
 
