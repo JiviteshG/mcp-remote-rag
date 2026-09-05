@@ -1,3 +1,4 @@
+import asyncio
 import os
 from fastmcp import FastMCP
 import chromadb
@@ -63,7 +64,7 @@ async def ingest_data_directory(llama_cloud_api_key, collection_name, data_dir):
     return f"Final document count in collection '{collection_name}': {final_count}"
 
 @mcp.tool
-def query_documents(query: str, n_results: int = 2, collection_name: str = COLLECTION_NAME) -> str:
+async def query_documents(query: str, n_results: int = 2, collection_name: str = COLLECTION_NAME) -> str:
     """
     Queries the ChromaDB collection for documents relevant to the provided query.
     Args:
@@ -73,14 +74,18 @@ def query_documents(query: str, n_results: int = 2, collection_name: str = COLLE
     Returns:
         str: A formatted string containing the query results, including document content, metadata, and distances.
     """
-    chroma_client = get_chromadb_client()
-    collection = chroma_client.get_collection(name=collection_name)
+    loop = asyncio.get_event_loop()
 
-    results = collection.query(
-        query_texts=[query],
-        n_results=n_results,
-        include=["documents", "metadatas", "distances"]
-    )
+    def _query():
+        chroma_client = get_chromadb_client()
+        collection = chroma_client.get_collection(name=collection_name)
+        return collection.query(
+            query_texts=[query],
+            n_results=n_results,
+            include=["documents", "metadatas", "distances"]
+        )
+
+    results = await loop.run_in_executor(None, _query)
 
     if len(results["documents"]) == 0 or not results["documents"][0]:
         return "No documents found."
