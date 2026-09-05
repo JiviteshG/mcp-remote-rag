@@ -15,3 +15,6 @@ papers
 .vscode/
 server.log
 server_err.log
+
+# Local interview prep and reference artifacts
+project-artifacts/
